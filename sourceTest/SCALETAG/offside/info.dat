@@ -1,0 +1,87 @@
+Executable : /usr/lib/x86_64-linux-gnu/bin/mpirun
+Command line arguments : -np 6 /home/ahose/Desktop/SCALETAG/ScaleTag/binaries/linux/gcc/x64/debug/ui -tao_monitor -tao_almm_mu_init 100.0 -tao_almm_mu_factor 10.0
+
+Command line arguments 2 : -tao_monitor -tao_monitor_constraint_norm -tao_almm_mu_init 100.0 -tao_almm_mu_factor 10.0 -ksp_monitor_singular_value
+
+-tao_monitor -tao_test_gradient -tao_test_hessp -tao_max_funcs
+-tao_almm_outer_monitor
+
+
+
+############ To test gradient #################################
+ -tao_test_gradient -tao_test_gradient_view
+ 
+ ######### field split
+ -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type full
+ 
+ -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type full -fieldsplit_champ_0_pc_type jacobi -fieldsplit_champ_1_pc_type lu
+ 
+ -ksp_type fgmres
+-pc_type fieldsplit
+-pc_fieldsplit_type schur
+-pc_fieldsplit_schur_fact_type full
+
+# Subsystem 0 (e.g., Displacements / Velocity)
+-fieldsplit_0_ksp_type gmres
+-fieldsplit_0_pc_type gamg
+
+# Subsystem 1 (e.g., Constraints / Pressure)
+-fieldsplit_1_ksp_type cg
+-fieldsplit_1_pc_type none
+
+
+-ksp_type fgmres -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type full-fieldsplit_0_ksp_type gmres -fieldsplit_0_pc_type gamg
+
+# Subsystem 0 (e.g., Displacements / Velocity)
+-fieldsplit_0_ksp_type gmres
+-fieldsplit_0_pc_type gamg
+
+# Subsystem 1 (e.g., Constraints / Pressure)
+-fieldsplit_1_ksp_type cg
+-fieldsplit_1_pc_type none
+
+
+-ksp_type preonly -pc_type lu -pc_factor_mat_solver_type mumps -ksp_monitor
+
+
+
+
+ -np 2 /home/ahose/Desktop/SCALETAG/ScaleTag/binaries/linux/gcc/x64/debug/ui -tao_monitor -eps_monitor -tao_monitor_constraint_norm -tao_almm_multipliers_type none -ksp_type fgmres -pc_type fieldsplit -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type full -fieldsplit_0_ksp_type gmres -fieldsplit_0_pc_type gamg -fieldsplit_1_ksp_type gmres -fieldsplit_1_pc_type gamg
+ 
+  -pc_type lu -pc_factor_mat_solver_type mumps -mat_mumps_icntl_24 1 -mat_mumps_icntl_14 200
+  
+  
+   -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type full -fieldsplit_0_ksp_type cg -fieldsplit_0_pc_type jacobi -fieldsplit_1_ksp_type gmres -fieldsplit_champ_1_pc_type jacobi
+  
+  
+  
+    -pc_fieldsplit_type schur -pc_fieldsplit_schur_fact_type full -fieldsplit_champ_0_pc_type jacobi -fieldsplit_champ_1_pc_type jacobi -ksp_monitor -pc_factor_shift_type NONZERO
+    
+    
+    -np 1 /home/ahose/Desktop/SCALETAG/ScaleTag/binaries/linux/icc/x64/debug/ui -monitor -mat_mumps_icntl_24 1 et -pc_factor_nonzeros_along_diagonal 1e-10 -ksp_error_if_not_converged -mat_mumps_icntl_24 10 -mat_mumps_icntl_6 7 -mat_type aij -mat_view_info -mat_mumps_icntl_23 16000
+    
+    -mat_mumps_icntl_6 7 -ksp_monitor -mat_mumps_icntl_24 1 et -pc_factor_nonzeros_along_diagonal 1e-10 -ksp_error_if_not_converged -mat_mumps_icntl_24 10 -mat_type aij -mat_view_info
+    
+    -mat_mumps_icntl_24 1
+-mat_mumps_cntl_3 1e-10 pc_factor_shift_type NONZERO ou -pc_factor_shift_amount 1e-12 -pc_factor_nonzeros_along_diagonal
+
+
+
+
+
+
+
+
+
+
+
+
+# The working parametrization of FIELDSPLIT
+-fieldsplit_champ_0_ksp_type fgmres -fieldsplit_champ_0_pc_type jacobi -fieldsplit_champ_0_pc_factor_mat_solver_type mumps -fieldsplit_champ_1_ksp_type fgmres -fieldsplit_champ_1_pc_type jacobi -ksp_monitor
+
+
+
+-np 5 /home/ahose/Desktop/SCALETAG/ScaleTag/binaries/linux/icc/x64/debug/ui  -mat_mumps_icntl_23 16000 -ksp_type gmres -pc_type jacobi  -malloc_debug -ksp_view -mat_mumps_icntl_24 1 -mat_mumps_icntl_14 100 -mat_mumps_cntl_1 1e-6 -mat_mumps_icntl_25 1 -mat_mumps_cntl_3 1e-8
+
+
+
