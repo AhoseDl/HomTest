@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/assets">
+        <file alias="qmldir">assets/qmldir</file>
+        <file alias="Style.qml">assets/Style.qml</file>
+        <file alias="fontawesome">assets/fa-solid-900.ttf</file>
+    </qresource>
+    <qresource prefix="/logos">
+        <file alias="abaquslogo">logos/abaqus.png</file>
+        <file alias="abaquslogo2">logos/abaqus2.jpeg</file>
+        <file alias="abaquslogo3">logos/abaqus.svg</file>
+        <file alias="abaquslogo4">logos/Abaqus.png</file>
+        <file alias="ansyslogo">logos/ansys.jpeg</file>
+        <file alias="marclogo">logos/marc.jpeg</file>
+        <file alias="marclogo2">logos/marc.tiff</file>
+        <file alias="scaletaglogo">logos/abaqus.png</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file alias="bordercollapse">icons/border-collapse.png</file>
+        <file alias="bordercollapsemore">icons/border-collapse-more.png</file>
+        <file alias="borderend">icons/border-end.png</file>
+        <file alias="borderexpand">icons/border-expand.png</file>
+        <file alias="borderexpandmore">icons/border-expand-more.png</file>
+        <!--file alias="borderline">icons/border-line.png</file-->
+        <file alias="borderline">icons/borderline5.png</file>
+        <file alias="bordermore">icons/border-more.png</file>
+        <file alias="link">icons/link2.png</file>
+        <file alias="link-hover">icons/link-hover.png</file>
+        <file alias="showMeshEdges">icons/showmeshedges.png</file>
+        <file alias="showMeshEdges2">icons/showmeshedges2.png</file>
+    </qresource>
+</RCC>

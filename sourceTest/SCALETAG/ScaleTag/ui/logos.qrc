@@ -1,0 +1,10 @@
+<RCC>
+<qresource prefix="/logos">
+<file alias="marc.png">logos/MSC_Marc.png</file>
+<file alias="abaqus.png">logos/Abaqus.png</file>
+<file alias="ansys.png">logos/ANSYS_logo.png</file>
+<file alias="scaletag.png">logos/scaletag.png</file>
+<file alias="scaletaglogo.svg">logos/scaletaglogo.svg</file>
+<file alias="scaletaglogo.png">logos/scaletaglogo.png</file>
+</qresource>
+</RCC>

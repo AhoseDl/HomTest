@@ -1,0 +1,422 @@
+#include "pbcutilities.h"
+
+//using namespace std;
+namespace scaletag {
+namespace models {
+
+PbcUtilities::PbcUtilities(QObject *parent)
+    : QObject{parent}
+{
+
+}
+void PbcUtilities::structBox(const MeshPbc<double,3>& meshPbc, double& Xmin, double& Xmax, double& Ymin, double& Ymax, double& Zmin, double& Zmax){
+// This function computes the bounding box of the mesh
+
+    size_t nPts=meshPbc.getNumberOfNodes();
+    vector<double> X, Y, Z;
+    for (size_t i=0; i<nPts; i++){X.push_back(meshPbc.getNodes()[i].getXi(0));}
+    for (size_t i=0; i<nPts; i++){Y.push_back(meshPbc.getNodes()[i].getXi(1));}
+    for (size_t i=0; i<nPts; i++){Z.push_back(meshPbc.getNodes()[i].getXi(2));}
+
+    sort(X.begin(), X.end());
+    sort(Y.begin(), Y.end());
+    sort(Z.begin(), Z.end());
+
+    Xmin=X[0]; Xmax=X[X.size()-1]; Ymin=Y[0]; Ymax=Y[Y.size()-1]; Zmin=Z[0]; Zmax=Z[Z.size()-1];
+
+}
+
+void PbcUtilities::nodesSelect(const MeshPbc<double,3>& meshPbc, /*string box,*/ bitset<6>bs, double epsi, vector<size_t>& Output) {
+
+    //This function identifies nodes that match bitset<6>bs
+    /*
+    box="Xmin Xmax Ymin Ymax Zmin Zmax"
+    */
+    //Output is the list of nodes that match bs
+
+    double Xmin, Xmax, Ymin, Ymax, Zmin, Zmax;
+    structBox(meshPbc, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax);
+    size_t nPts=meshPbc.getNumberOfNodes();
+
+    string bPtString, bsString;
+
+    for(size_t i=0; i<nPts; i++){
+    bool bxmin, bxmax, bymin, bymax, bzmin, bzmax;
+
+    bxmin=(fabs(meshPbc.getNodes()[i].getXi(0)-Xmin)<=epsi);
+    bxmax=(fabs(meshPbc.getNodes()[i].getXi(0)-Xmax)<=epsi);
+    bymin=(fabs(meshPbc.getNodes()[i].getXi(1)-Ymin)<=epsi);
+    bymax=(fabs(meshPbc.getNodes()[i].getXi(1)-Ymax)<=epsi);
+    bzmin=(fabs(meshPbc.getNodes()[i].getXi(2)-Zmin)<=epsi);
+    bzmax=(fabs(meshPbc.getNodes()[i].getXi(2)-Zmax)<=epsi);
+
+    bPtString=to_string(bxmin)+to_string(bxmax)+to_string(bymin)+to_string(bymax)+to_string(bzmin)+to_string(bzmax);
+    bsString=bs.to_string();
+
+    if(bPtString==bsString) Output.push_back(i);
+}
+}
+
+void PbcUtilities::edgesLinks(const MeshPbc<double,3>& meshPbc, const vector<size_t>& Sommets, int ind, const vector<size_t>& v1, const vector<size_t>& v2,
+                              double epsi, vector<array<size_t,3> >& sortie) {
+//Given two node lists on edges this function matches nodes two by two
+
+
+// The parameter ind traduces whether the edges are oriented in x direction(ind=0), y direction(ind=1) or in z direction(ind=2)
+    // The function assumes that vectA, vectB, vectC, vectD, vectAp, vectBp, etc ... have been prior declared
+
+    array<size_t,3>PointEqui;
+    size_t tn, rt1, rt2;
+    size_t sizev1=v1.size(), sizev2=v2.size();
+
+    assert(sizev1==sizev2);
+    assert(ind==0 || ind==1 || ind==2);
+    double coordAv1, coordBv1, coordAv2, coordBv2;
+    double condA, condB;
+    for (size_t i=0; i<sizev1; i++){
+    /*if(v1[i]==Sommets[0] || v1[i]==Sommets[1] || v1[i]==Sommets[2] || v1[i]==Sommets[3] || v1[i]==Sommets[4] || v1[i]==Sommets[5] || v1[i]==Sommets[6] || v1[i]==Sommets[7]) continue; */ // To skip angle vertices
+        for (size_t j=0; j<sizev1; j++){
+            {
+                if(ind==0){
+                coordAv1=meshPbc.getNodes()[ v1[i] ].getXi(0);
+                coordAv2= meshPbc.getNodes()[ v2[j] ].getXi(0);
+                coordBv1= meshPbc.getNodes()[ v1[i]  ].getXi(2);
+                coordBv2= meshPbc.getNodes()[ v2[j]  ].getXi(2);}
+                else if(ind==1){
+                coordAv1=meshPbc.getNodes()[ v1[i] ].getXi(1);
+                coordAv2=meshPbc.getNodes()[ v2[j] ].getXi(1);
+                coordBv1=meshPbc.getNodes()[ v1[i] ].getXi(2);
+                coordBv2=meshPbc.getNodes()[ v2[j] ].getXi(2);}
+                else if(ind==2){
+                coordAv1=meshPbc.getNodes()[ v1[i] ].getXi(2);
+                coordAv2=meshPbc.getNodes()[ v2[j] ].getXi(2);
+
+                coordBv1=meshPbc.getNodes()[ v1[i] ].getXi(1);
+                coordBv2=meshPbc.getNodes()[ v2[j] ].getXi(1);}
+
+            condA=coordAv1-coordAv2;
+
+            }
+            if(condA<=epsi){
+            tn=v1[i];
+            rt1=v2[j];
+            condB=coordBv1-coordBv2;
+                if(condB<=epsi){
+                    if(ind==0) {rt2=Sommets[3];/*vectD[0] ;*/} else if (ind==1){rt2=Sommets[1];/*vectB[0] ;*/}else if(ind==2){rt2=Sommets[1];/* vectB[0];*/}
+                }
+                else
+                {
+                if(ind==0) {rt2=Sommets[4];/*vectAp[0] ;*/} else if (ind==1){rt2=Sommets[4];/*vectAp[0] ;*/}else if(ind==2){rt2=Sommets[3];/*vectD[0] ;*/}
+                }
+            }
+            }
+    PointEqui[0]=tn;
+    PointEqui[1]=rt1;
+    PointEqui[2]=rt2;
+    sortie.push_back(PointEqui);
+    }
+
+}
+void PbcUtilities::facesLinks(const MeshPbc<double,3>& meshPbc, const vector<size_t>& Sommets, int ind, const vector<size_t>& v1, const vector<size_t>& v2,
+                              double epsi, vector<array<size_t,3> >& sortie){
+
+    //Given two node lists on faces this function matches nodes two by two
+
+    //The parameter ind indicates wether the faces normals are oriented in te x  (ind=0), y(ind=1), z(ind=2) direction
+
+    array<size_t,3>PointEqui;
+    size_t tn, rt1, rt2;
+    size_t sizev1=v1.size(), sizev2=v2.size();
+
+    assert(sizev1==sizev2);
+    assert(ind==0 || ind==1 || ind==2);
+    double coordAv1, coordBv1, coordAv2, coordBv2;
+    double condA, condB;
+    for (size_t i=0; i<sizev1; i++){
+    /*if(v1[i]==Sommets[0] || v1[i]==Sommets[1] || v1[i]==Sommets[2] || v1[i]==Sommets[3] || v1[i]==Sommets[4] || v1[i]==Sommets[5] || v1[i]==Sommets[6] || v1[i]==Sommets[7]) continue;*/ // To skip angle vertices
+        for (size_t j=0; j<sizev1; j++){
+
+
+                if(ind==0){
+                coordAv1=meshPbc.getNodes()[ v1[i] ].getXi(1);
+                coordAv2=meshPbc.getNodes()[ v2[j] ].getXi(1);
+                coordBv1=meshPbc.getNodes()[ v1[i] ].getXi(2);
+                coordBv2=meshPbc.getNodes()[ v2[j] ].getXi(2);}
+                else if(ind==1){
+                coordAv1=meshPbc.getNodes()[ v1[i] ].getXi(0);
+                coordAv2=meshPbc.getNodes()[ v2[j] ].getXi(0);
+                coordBv1=meshPbc.getNodes()[ v1[i] ].getXi(2);
+                coordBv2=meshPbc.getNodes()[ v2[j] ].getXi(2);}
+                else if(ind==2){
+                coordAv1=meshPbc.getNodes()[ v1[i] ].getXi(0);
+                coordAv2=meshPbc.getNodes()[ v2[j] ].getXi(0);
+                coordBv1=meshPbc.getNodes()[ v1[i] ].getXi(1);
+                coordBv2=meshPbc.getNodes()[ v2[j] ].getXi(1);}
+
+
+            condA=coordAv1-coordAv2;
+            condB=coordBv1-coordBv2;
+            if(condA<=epsi && condB<=epsi){
+            tn=v1[i];
+            rt1=v2[j];
+            if(ind==0){rt2=Sommets[1];} else if(ind==1){rt2=Sommets[3];} else if(ind==2){rt2=Sommets[4];}
+
+            }
+        }
+        PointEqui[0]=tn;
+        PointEqui[1]=rt1;
+        PointEqui[2]=rt2;
+        sortie.push_back(PointEqui);
+    }
+
+}
+
+void PbcUtilities::createPbcLinks(MeshPbc<double, 3>& meshPbc, vector<array<size_t, 3> >& pbcLinks, size_t& NbLinks, vector<size_t>& sommets){
+    double epsi=0.0;
+    vector<size_t> vectA, vectB, vectC, vectD, vectAp, vectBp, vectCp, vectDp;
+    bitset<6> bA("101010"), bB("011010"), bC("010110"), bD("100110"), bAp("101001"), bBp("011001"), bCp("010101"), bDp("100101");
+
+    pbcLinks.clear();
+    //Definition of corners vertices indices
+    double Xmin, Xmax, Ymin, Ymax, Zmin, Zmax;
+    structBox(meshPbc, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax);
+    size_t vexist=0;
+    nodesSelect(meshPbc, bA, epsi, vectA);
+    nodesSelect(meshPbc, bB, epsi, vectB);
+    nodesSelect(meshPbc, bC, epsi, vectC);
+    nodesSelect(meshPbc, bD, epsi, vectD);
+    nodesSelect(meshPbc, bAp, epsi, vectAp);
+    nodesSelect(meshPbc, bBp, epsi, vectBp);
+    nodesSelect(meshPbc, bCp, epsi, vectCp);
+    nodesSelect(meshPbc, bDp, epsi, vectDp);
+
+    if(vectA.size()==1) ; else {vectA.push_back(meshPbc.getNumberOfNodes() + vexist++); meshPbc.addNode(vectA[0],Xmin, Ymin, Zmin);}
+    if(vectB.size()==1) ; else {vectB.push_back(meshPbc.getNumberOfNodes() + vexist++); meshPbc.addNode(vectA[0],Xmax, Ymin, Zmin);}
+    if(vectC.size()==1) ; else {vectC.push_back(meshPbc.getNumberOfNodes() + vexist++); meshPbc.addNode(vectA[0],Xmax, Ymax, Zmin);}
+    if(vectD.size()==1) ; else {vectD.push_back(meshPbc.getNumberOfNodes() + vexist++); meshPbc.addNode(vectA[0],Xmin, Ymax, Zmin);}
+    if(vectAp.size()==1) ; else {vectAp.push_back(meshPbc.getNumberOfNodes() + vexist++); meshPbc.addNode(vectA[0],Xmin, Ymin, Zmax);}
+    if(vectBp.size()==1) ; else {vectBp.push_back(meshPbc.getNumberOfNodes() + vexist++); meshPbc.addNode(vectA[0],Xmax, Ymin, Zmax);}
+    if(vectCp.size()==1) ; else {vectCp.push_back(meshPbc.getNumberOfNodes() + vexist++); meshPbc.addNode(vectA[0],Xmax, Ymax, Zmax);}
+    if(vectDp.size()==1) ; else {vectDp.push_back(meshPbc.getNumberOfNodes() + vexist++);  meshPbc.addNode(vectA[0],Xmin, Ymax, Zmax);}
+
+    sommets.push_back(vectA[0]); sommets.push_back(vectB[0]); sommets.push_back(vectC[0]); sommets.push_back(vectD[0]);
+    sommets.push_back(vectAp[0]); sommets.push_back(vectBp[0]); sommets.push_back(vectCp[0]); sommets.push_back(vectDp[0]);
+
+
+//    if(vectA.size()==1){
+
+//    nodesSelect(meshPbc, bB, epsi, vectB);
+//    nodesSelect(meshPbc, bC, epsi, vectC);
+//    nodesSelect(meshPbc, bD, epsi, vectD);
+//    nodesSelect(meshPbc, bAp, epsi, vectAp);
+//    nodesSelect(meshPbc, bBp, epsi, vectBp);
+//    nodesSelect(meshPbc, bCp, epsi, vectCp);
+//    nodesSelect(meshPbc, bDp, epsi, vectDp);
+
+//    }else{
+//    vectA.push_back(meshPbc.getNumberOfNodes()-1+1);
+//    vectB.push_back(meshPbc.getNumberOfNodes()-1+2);
+//    vectC.push_back(meshPbc.getNumberOfNodes()-1+3);
+//    vectD.push_back(meshPbc.getNumberOfNodes()-1+4);
+//    vectAp.push_back(meshPbc.getNumberOfNodes()-1+5);
+//    vectBp.push_back(meshPbc.getNumberOfNodes()-1+6);
+//    vectCp.push_back(meshPbc.getNumberOfNodes()-1+7);
+//    vectDp.push_back(meshPbc.getNumberOfNodes()-1+8);
+//    }
+
+// Selection of edge nodes. From the definition of nodesSelect, corners vertices are not selected
+// corners vertices cannot satisfy bitset<6> bYmaxZmin("000110"), bYminZmin("001010"), bYmaxZmax("000101"),
+//bYminZmax("001001"), bXmaxZmin("010010"), bXminZmin("100010"), bXmaxZmax("010001"), bXminZmax("100001"),
+//bXmaxYmin("011000"), bXminYmin("101000"), bXmaxYmax("010100"), bXminYmax("100100");
+
+    vector<size_t> YmaxZmin, YminZmin, YmaxZmax, YminZmax, XmaxZmin, XminZmin, XmaxZmax, XminZmax, XmaxYmin, XminYmin, XmaxYmax, XminYmax;
+    bitset<6>bYmaxZmin("000110"), bYminZmin("001010"), bYmaxZmax("000101"), bYminZmax("001001"), bXmaxZmin("010010"), bXminZmin("100010"), bXmaxZmax("010001"), bXminZmax("100001"), bXmaxYmin("011000"), bXminYmin("101000"), bXmaxYmax("010100"), bXminYmax("100100");
+
+    //Rotation autour de x
+    nodesSelect(meshPbc, bYmaxZmin, epsi, YmaxZmin);
+    nodesSelect(meshPbc, bYminZmin, epsi, YminZmin);
+    nodesSelect(meshPbc, bYmaxZmax, epsi, YmaxZmax);
+    nodesSelect(meshPbc, bYminZmax, epsi, YminZmax);
+
+    //Rotation autour de y
+    nodesSelect(meshPbc, bXmaxZmin, epsi, XmaxZmin);
+    nodesSelect(meshPbc, bXminZmin, epsi, XminZmin);
+    nodesSelect(meshPbc, bXmaxZmax, epsi, XmaxZmax);
+    nodesSelect(meshPbc, bXminZmax, epsi, XminZmax);
+
+    //Rotation autour de z
+    nodesSelect(meshPbc, bXmaxYmin, epsi, XmaxYmin);
+    nodesSelect(meshPbc, bXminYmin, epsi, XminYmin);
+    nodesSelect(meshPbc, bXmaxYmax, epsi, XmaxYmax);
+    nodesSelect(meshPbc, bXminYmax, epsi, XminYmax);
+
+    //Selection of face nodes. From the definition of nodesSelect, corners vertices are not selected
+    // As the corner vertices cannot satisfy bitset<6> bXminF("100000"), bXmaxF("010000"), bYminF("001000"),
+    //bYmaxF("000100"), bZminF("000010"), bZmaxF("000001");
+
+    vector<size_t> XminF, XmaxF, YminF, YmaxF, ZminF, ZmaxF;
+    bitset<6> bXminF("100000"), bXmaxF("010000"), bYminF("001000"), bYmaxF("000100"), bZminF("000010"), bZmaxF("000001");
+
+    nodesSelect(meshPbc, bXminF, epsi, XminF);
+    nodesSelect(meshPbc, bXmaxF, epsi, XmaxF);
+    nodesSelect(meshPbc, bYminF, epsi, YminF);
+    nodesSelect(meshPbc, bYmaxF, epsi, YmaxF);
+    nodesSelect(meshPbc, bZminF, epsi, ZminF);
+    nodesSelect(meshPbc, bZmaxF, epsi, ZmaxF);
+
+    //Partial verification of mesh symetry
+if( XminF.size()==XmaxF.size() && YminF.size()==YmaxF.size() && ZminF.size()==ZmaxF.size() && XminZmin.size()==YminZmin.size() && YmaxZmax.size()==YminZmax.size() && XmaxZmin.size()==XminZmin.size() && XmaxZmax.size()==XminZmax.size() && XmaxYmin.size()==XminYmin.size() && XmaxYmax.size()==XminYmax.size())
+{}else{qDebug()<<"The mesh is not symmetric"; abort();}
+
+//Generation of pbcLinks
+array<size_t,3>cornerLink1, cornerLink2, cornerLink3, cornerLink4;
+//cornerLink1={vectC[0], vectD[0], vectB[0]};
+//cornerLink2={vectCp[0], vectDp[0], vectB[0]};
+//cornerLink3={vectBp[0], vectAp[0], vectB[0]};
+//cornerLink4={vectDp[0], vectAp[0], vectD[0]};
+
+//cornerLink1={vectD[0], vectC[0],  vectB[0]};
+//cornerLink2={vectDp[0], vectCp[0],  vectB[0]};
+//cornerLink3={vectAp[0], vectBp[0],  vectB[0]};
+//cornerLink4={vectAp[0], vectDp[0],  vectD[0]};
+
+cornerLink1={vectC[0], vectD[0],  vectB[0]}; //+1 +1
+cornerLink2={vectDp[0], vectCp[0], vectB[0]}; //+1  -1
+cornerLink3={vectBp[0], vectAp[0], vectB[0]}; //+1  +1
+cornerLink4={vectDp[0], vectAp[0], vectD[0]}; //+1 +1
+
+
+
+vector<array<size_t,3> >cornersLinks;
+cornersLinks.push_back(cornerLink1);
+cornersLinks.push_back(cornerLink2);
+cornersLinks.push_back(cornerLink3);
+cornersLinks.push_back(cornerLink4);
+
+vector<array<size_t,3> > edgesLinks1, edgesLinks2, edgesLinks3, edgesLinks4, edgesLinks5, edgesLinks6, edgesLinks7, edgesLinks8, edgesLinks9;
+vector<size_t> cornersNodesList; //cornersNodesList contains corners nodes numerotation in the order A, B, C, D, Ap, Bp, Cp, Dp
+cornersNodesList.push_back(vectA[0]); cornersNodesList.push_back(vectB[0]); cornersNodesList.push_back(vectC[0]); cornersNodesList.push_back(vectD[0]);
+cornersNodesList.push_back(vectAp[0]); cornersNodesList.push_back(vectBp[0]); cornersNodesList.push_back(vectCp[0]); cornersNodesList.push_back(vectDp[0]);
+
+//Pour les deux premieres lignes, tied-rt1 =rt2; numerotation <tn, rt1, rt2>
+//pour la dernière ligne,
+
+//rotation autour de x
+edgesLinks(meshPbc, cornersNodesList, 0, YmaxZmin, YminZmin, epsi, edgesLinks1); //tn-rt1=rt2   <tn, rt1, rt2>  //+1  +1
+edgesLinks(meshPbc, cornersNodesList, 0, YminZmax, YmaxZmax, epsi, edgesLinks2); //rt1-tn=rt2   <tn, rt1, rt2>  // -1 +1
+edgesLinks(meshPbc, cornersNodesList, 0, YminZmax, YminZmin, epsi, edgesLinks3); //tn-rt1=rt2   <tn, rt1, rt2>  //+1  +1
+
+//rotation autour de y
+edgesLinks(meshPbc, cornersNodesList, 1, XmaxZmin, XminZmin, epsi, edgesLinks4);
+edgesLinks(meshPbc, cornersNodesList, 1, XminZmax, XmaxZmax, epsi, edgesLinks5);
+edgesLinks(meshPbc, cornersNodesList, 1, XminZmax, XminZmin, epsi, edgesLinks6);
+
+//rotation autour de z
+edgesLinks(meshPbc, cornersNodesList, 2, XmaxYmin, XminYmin, epsi, edgesLinks7);
+edgesLinks(meshPbc, cornersNodesList, 2, XminYmax, XmaxYmax,  epsi, edgesLinks8);
+edgesLinks(meshPbc, cornersNodesList, 2, XminYmax, XminYmin, epsi, edgesLinks9);
+
+vector<array<size_t,3> > facesLinksX, facesLinksY, facesLinksZ;
+
+facesLinks(meshPbc, cornersNodesList, 0, XmaxF, XminF, epsi, facesLinksX); //tn-rt1=rt2 <tn, rt1, rt2>  //+1  +1
+facesLinks(meshPbc, cornersNodesList, 1, YmaxF, YminF, epsi, facesLinksY); //tn-rt1=rt2 <tn, rt1, rt2>  //+1  +1
+facesLinks(meshPbc, cornersNodesList, 2, ZmaxF, ZminF, epsi, facesLinksZ); //tn-rt1=rt2 <tn, rt1, rt2>  //+1  +1
+
+//vector<array<size_t,3> > pbcLinks(cornersLinks);
+
+for (auto p : cornersLinks) pbcLinks.push_back(p);
+for (auto p : edgesLinks1) pbcLinks.push_back(p);
+for (auto p : edgesLinks2) pbcLinks.push_back(p);
+for (auto p : edgesLinks3) pbcLinks.push_back(p);
+for (auto p : edgesLinks4) pbcLinks.push_back(p);
+for (auto p : edgesLinks5) pbcLinks.push_back(p);
+for (auto p : edgesLinks6) pbcLinks.push_back(p);
+for (auto p : edgesLinks7) pbcLinks.push_back(p);
+for (auto p : edgesLinks8) pbcLinks.push_back(p);
+for (auto p : edgesLinks9) pbcLinks.push_back(p);
+for (auto p : facesLinksX) pbcLinks.push_back(p);
+for (auto p : facesLinksY) pbcLinks.push_back(p);
+for (auto p : facesLinksZ) pbcLinks.push_back(p);
+
+NbLinks=3*( 4+3*( YminZmin.size()+XminZmin.size()+XminYmin.size() )+ XminF.size()+YminF.size()+ZminF.size() );
+}
+
+//***************************
+std::vector<std::list<size_t> > PbcUtilities::getMatrixStructure(const MeshPbc<double,3>& Th, const vector<array<size_t,3> >& pbcLinks,
+const std::valarray<size_t>& numPbc,const fem::BCs& bc, size_t ndof) const{
+
+//std::vector<std::list<size_t> > vec(ndof*pbcLinks.size());
+std::vector<std::list<size_t> > vec(bc.getTiedNumber());
+
+size_t tiedOffset=ndof*Th.getNumberOfNodes()-bc.getDirNumber()-bc.getTiedNumber();
+size_t retainedOffset=ndof*Th.getNumberOfNodes()-bc.getDirNumber() -bc.getTiedNumber()-bc.getRetainedNumber();
+size_t tdof, rtdof1, rtdof2;
+for(size_t i=0; i<pbcLinks.size()/*bc.getTiedNumber()*/; i++)
+        for(size_t kndof=0; kndof<ndof; kndof++){
+            tdof=ndof*pbcLinks[i][0]+kndof;
+            rtdof1=ndof*pbcLinks[i][1]+kndof;
+            rtdof2=ndof*pbcLinks[i][2]+kndof;
+
+            //if( !(bc.isDirichlet(tdof)) )   vec[ numPbc[tdof]-tiedOffset].insert(vec[ numPbc[tdof]-tiedOffset].end(),   numPbc[tdof]-tiedOffset);
+            if( bc.isRetained(rtdof1) && !(bc.isDirichlet(rtdof1)) ) vec[numPbc[tdof]-tiedOffset].insert(vec[numPbc[tdof]-tiedOffset].end(),    numPbc[rtdof1]-retainedOffset);
+            if(bc.isRetained(rtdof2) && !(bc.isDirichlet(rtdof2)) ) vec[numPbc[tdof]-tiedOffset].insert(vec[numPbc[tdof]-tiedOffset].end(),    numPbc[rtdof2]-retainedOffset);
+        }
+
+return vec;
+}
+
+void PbcUtilities::createConstraintMatrix(const MeshPbc<double,3>& Th, const vector<array<size_t,3> >& pbcLinks,
+const std::valarray<size_t>& numPbc,const fem::BCs& bc, size_t ndof,
+fem::matrix<double>& mat){
+
+mat.resize(getMatrixStructure(Th, pbcLinks, numPbc, bc, ndof), bc.getRetainedNumber());
+
+size_t tiedOffset=ndof*Th.getNumberOfNodes()-bc.getDirNumber()-bc.getTiedNumber();
+size_t retainedOffset=ndof*Th.getNumberOfNodes()-bc.getDirNumber() -bc.getTiedNumber()-bc.getRetainedNumber();
+size_t tdof, rtdof1, rtdof2;
+for(size_t i=0; i<pbcLinks.size(); i++)
+        for(size_t kndof=0; kndof<ndof; kndof++){
+            tdof=ndof*pbcLinks[i][0]+kndof;
+            rtdof1=ndof*pbcLinks[i][1]+kndof;
+            rtdof2=ndof*pbcLinks[i][2]+kndof;
+
+            //mat.at(numPbc[tdof]-tiedOffset , numPbc[tdof]-tiedOffset) =1;
+            if(!(bc.isDirichlet(rtdof1)) && bc.isRetained(rtdof1) ) mat.at(numPbc[tdof]-tiedOffset, numPbc[rtdof1]-retainedOffset) =-1;
+            if(!(bc.isDirichlet(rtdof2)) && bc.isRetained(rtdof2)) mat.at(numPbc[tdof]-tiedOffset, numPbc[rtdof2]-retainedOffset) =1;
+            //Ut-Urt1+Urt2=0
+            //if( !(bc.isDirichlet(rtdof1)) ) vec[ndof*i+kndof ].insert(vec[ndof*i+kndof].end(),    numPbc[rtdof1]-retainedOffset);
+            //if( !(bc.isDirichlet(rtdof2)) ) vec[ndof*i+kndof ].insert(vec[ndof*i+kndof].end(),    numPbc[rtdof2]-retainedOffset);
+
+        }
+
+}
+
+void PbcUtilities::createConstraintVector(const MeshPbc<double,3>& Th, const vector<array<size_t,3> >& pbcLinks,
+                            const std::valarray<size_t>& numPbc,const fem::BCs& bc, size_t ndof,
+                                          std::valarray<double>& vec){
+size_t nnode=Th.getNumberOfNodes();
+
+//bool(*findValue)(std::vector<size_t>& vec, size_t i)=[](std::vector<size_t>& vec, size_t i){
+//    auto resIt=std::find(vec.begin(), vec.end(), i);
+//        if(resIt==vec.end()) return false;
+//        else return true;
+//};
+vec.resize(ndof*nnode,0);
+
+std::vector<size_t>dirRetVec;
+
+for(size_t i=0; i<pbcLinks.size(); i++) for(size_t kndof=0; kndof<ndof; kndof++){
+if(bc.isDirichlet( ndof*pbcLinks[i][2]+kndof  ))  dirRetVec.push_back(  ndof*pbcLinks[i][2]+kndof );}
+
+//std::sort followed by std::unique to remove not only consecutives but all duplicates
+std::sort( std::begin(dirRetVec), std::end(dirRetVec));
+auto lastdirRetVec=std::unique(std::begin(dirRetVec), std::end(dirRetVec));
+dirRetVec.erase(lastdirRetVec, std::end(dirRetVec));
+
+for(auto i:dirRetVec) vec[numPbc[i]]=-1*bc.PbCDirichletValue(i, ndof);
+}
+
+
+
+} // namespace models
+} // namespace scaletag

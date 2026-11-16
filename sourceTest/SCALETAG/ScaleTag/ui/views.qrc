@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/views">
+        <file alias="MainView.qml">views/MainView.qml</file>
+        <file alias="WelcomeView.qml">views/WelcomeView.qml</file>
+        <file alias="AbaqusHomeView.qml">views/AbaqusHomeView.qml</file>
+        <file alias="AnsysHomeView.qml">views/AnsysHomeView.qml</file>
+        <file alias="MarcHomeView.qml">views/MarcHomeView.qml</file>
+        <file alias="ScaleTagHomeView.qml">views/ScaleTagHomeView.qml</file>
+        <file alias="Vtk.qml">views/Vtk.qml</file>
+        <file alias="vtkqmldir">../../../../../../../usr/local/lib/qml/VTK.9.3/qmldir</file>
+        <file alias="plugins.qmltypes">../../../../../../../usr/local/lib/qml/VTK.9.3/plugins.qmltypes</file>
+        <file alias="libqmlvtkplugin.so">../../../../../../../usr/local/lib/qml/VTK.9.3/libqmlvtkplugin.so</file>
+        <file alias="Graphics.qml">views/Graphics.qml</file>
+    </qresource>
+</RCC>

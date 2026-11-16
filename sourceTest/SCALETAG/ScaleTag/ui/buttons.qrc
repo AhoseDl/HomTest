@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/buttons">
+        <file alias="ImportModel.qml">buttons/ImportModel.qml</file>
+
+    </qresource>
+</RCC>
