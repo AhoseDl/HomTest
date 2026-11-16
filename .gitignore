@@ -1,11 +1,11 @@
-./offside
-./taoanalysis_hacked2.cpp
-./taoanalysis_hacked.cpp
-./occexample.h
-./maintreeview.h.old
-./kelvinVertices.dat
-./GenSolve.dat
-./SCALETAG/ScaleTag/installer
-./SCALETAG/ScaleTag/binaries
+./sourceTest/SCALETAG/offside
+./sourceTest/SCALETAG/taoanalysis_hacked2.cpp
+./sourceTest/SCALETAG/taoanalysis_hacked.cpp
+./sourceTest/SCALETAG/occexample.h
+./sourceTest/SCALETAG/maintreeview.h.old
+./sourceTest/SCALETAG/kelvinVertices.dat
+./sourceTest/SCALETAG/GenSolve.dat
+./sourceTest/SCALETAG/SCALETAG/ScaleTag/installer
+./sourceTest/SCALETAG/SCALETAG/ScaleTag/binaries
 
 
