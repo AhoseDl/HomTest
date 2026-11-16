@@ -3,7 +3,7 @@
 #allow .gitignore
 
 !.gitignore  
-!.Readme.md
+!Readme.md
 !sourceTest
 !sourceTest/SCALETAG/
 !sourceTest/SCALETAG/ScaleTag/
