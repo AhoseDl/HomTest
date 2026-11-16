@@ -1,6 +1,0 @@
-<RCC>
-<qresource prefix="/graphics">
-<file alias="qmldir">graphics/qmldir</file>
-<file alias="Graphics.qml">graphics/Graphics.qml</file>
-</qresource>
-</RCC>

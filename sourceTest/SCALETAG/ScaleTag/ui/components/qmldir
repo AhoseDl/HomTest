@@ -1,5 +1,0 @@
-module components
-ProjectTypeButton 1.0 ProjectTypeButton.qml
-SimulationButton 1.0 SimulationButton.qml
-BuildWindowSetup 1.0 BuildWindowSetup.qml
-ProjectTypeButton2 1.0 ProjectTypeButton2.qml
