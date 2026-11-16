@@ -1,0 +1,40 @@
+#this to set only autorized files
+*
+#allow .gitignore
+
+!.gitignore  
+!.Readme.md
+!sourceTest
+!sourceTest/SCALETAG/
+!sourceTest/SCALETAG/ScaleTag/
+!sourceTest/SCALETAG/ScaleTag/ui/source/
+!sourceTest/SCALETAG/ScaleTag/ui/
+!sourceTest/SCALETAG/ScaleTag/ui/source/window/
+!sourceTest/SCALETAG/ScaleTag/ui/source/window/** 
+#The ** to allow everything in window
+
+#!sourceTest/SCALETAG/ScaleTag/ui/source/window/mainTreeView.h
+#!sourceTest/SCALETAG/ScaleTag/ui/source/window/mainwindow.cpp
+#!sourceTest/SCALETAG/ScaleTag/ui/source/window/outputhandle.h
+#!sourceTest/SCALETAG/ScaleTag/ui/source/window/outputhandle.cpp
+#!sourceTest/SCALETAG/ScaleTag/ui/source/window/scaletagdialogs.cpp
+#!sourceTest/SCALETAG/ScaleTag/ui/source/window/scaletagdialogs.h
+!sourceTest/SCALETAG/ScaleTag/stlib
+!sourceTest/SCALETAG/ScaleTag/stlib/source/
+!sourceTest/SCALETAG/ScaleTag/stlib/source/frames/
+!sourceTest/SCALETAG/ScaleTag/stlib/source/frames/heavytask.h
+!sourceTest/SCALETAG/ScaleTag/stlib/source/frames/heavytask.cc
+
+
+#Lines after this doesn't matter because "*" at the begenning already means to ignore everything
+./sourceTest/SCALETAG/offside
+./sourceTest/SCALETAG/taoanalysis_hacked2.cpp
+./sourceTest/SCALETAG/taoanalysis_hacked.cpp
+./sourceTest/SCALETAG/occexample.h
+./sourceTest/SCALETAG/maintreeview.h.old
+./sourceTest/SCALETAG/kelvinVertices.dat
+./sourceTest/SCALETAG/GenSolve.dat
+./sourceTest/SCALETAG/ScaleTag/installer
+./sourceTest/SCALETAG/ScaleTag/binaries
+
+
